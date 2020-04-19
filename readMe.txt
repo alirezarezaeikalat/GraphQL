@@ -96,3 +96,69 @@ we have to provide query string, so we use Graphiql:
           id
         }
       }
+
+7. We can use GraphQLID for the id, it finds int and string, 
+    it changes the int to string in resolve function
+
+8. to define the relation of the objects: 
+    first we define the relation between objects, for example, 
+    in this app, every book has an athor and each author can have 
+    many books, so we add authorId to the books array for each 
+    book, and add author to the BookType, when we make a request 
+    for the book like this:
+
+      {
+        book(id: 2){
+          name
+          genre
+          author{
+            name
+          }
+        }
+      }
+      the resolve function in RootQuery get all the data for the 
+      book and save that data in the parent element, and we can 
+      use authorId in the books to get the author
+
+    const BookType = new GraphQLObjectType({
+      name: 'Book',
+      fields: () => ({
+        id: {type: GraphQLID},
+        name: {type: GraphQLString},
+        genre: {type: GraphQLString},
+        author: {
+          type: AuthorType,
+          resolve(parent, args){
+            return _.find(authors, {id: parent.authorId})
+          }
+        }
+      })
+    });
+
+9. When we want to use lists, for example an author has a list of 
+books, First we have to import GraphQLList and then: 
+
+    const AuthorType = new GraphQLObjectType({
+      name: 'Author', 
+      fields: () => ({
+        id: {type: GraphQLID},
+        name: {type: GraphQLString},
+        age: {type: GraphQLInt},
+        books: {
+          type: new GraphQLList(BookType),
+          resolve(parent, args){
+            return _.filter(books, {authorId: parent.id});
+          }
+        }
+      })
+    });
+
+10. If we want to get all the books or authors just add this 
+    to RootQueryType:
+
+      books: {
+        type: new GraphQLList(BookType),
+        resolve(parent, args){
+          return books;
+        }
+      },
