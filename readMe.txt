@@ -162,3 +162,7 @@ books, First we have to import GraphQLList and then:
           return books;
         }
       },
+
+11. In graphQL mutations are the way of adding data, removing data
+    or editing data (It is like, delete, post, update in REST)
+    
