@@ -164,5 +164,46 @@ books, First we have to import GraphQLList and then:
       },
 
 11. In graphQL mutations are the way of adding data, removing data
-    or editing data (It is like, delete, post, update in REST)
+    or editing data (It is like, delete, post, update in REST), 
+    mutation is just like RootQueryType:
     
+    const MutationType = new GraphQLObjectType({
+      name: 'Mutation',
+      fields: {
+        addAuthor: {
+          type: AuthorType,
+          args: {
+            name: {type: GraphQLString},
+            age: {type: GraphQLInt}
+          },
+          resolve(parent, args){
+            let author = new Author({
+              name: args.name,
+              age: args.age
+            });
+            return author.save();
+          }
+        }
+      }
+    });
+
+    then you have to add this mutation in the schema: 
+    
+    module.exports = new GraphQLSchema({
+      query: RootQueryType,
+      mutation: MutationType
+    });
+
+12. To use this mutation in the graphiql we should perform like this: 
+
+      mutation {
+        addAuthor(name: "Alireza", age: 27){
+          name  // data to receive back 
+          age
+        }
+      }
+
+13. To make something required in GraphQL, we have to require something:
+    GraphQLNonNull and use this like this: 
+
+      name: { type: new GraphQLNonNull(GraphQLString) },
