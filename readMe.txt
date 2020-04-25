@@ -207,3 +207,91 @@ books, First we have to import GraphQLList and then:
     GraphQLNonNull and use this like this: 
 
       name: { type: new GraphQLNonNull(GraphQLString) },
+
+14. Apolo is just like Axios for the GraphQl, to install it: 
+
+    npm install apollo-boost @apollo/react-hooks graphql
+
+after installing apolo we need to set it up: 
+
+    import ApolloClient from 'apollo-boost';
+    import { ApolloProvider } from "@apollo/react-hooks";
+
+    // apollo client setup
+    const client = new ApolloClient({
+      uri: "http://localhost:5000/graphql"
+    });
+    class App extends Component {
+      render() {
+        return (
+          <ApolloProvider client={client}>
+            <div id="main">
+              <h1>Ninja Reading List</h1>
+              <BookList></BookList>
+            </div>
+          </ApolloProvider>
+        );
+      }
+    }
+
+15. After setting up the Apolo we can query data from the front end,
+    we can query data from the client and react components:
+    
+    a. query data from client: 
+          
+          import { gql } from "apollo-boost";
+          // or you can use `import gql from 'graphql-tag';` instead
+          client
+            .query({
+              query: gql`
+                {
+                  rates(currency: "USD") {
+                    currency
+                  }
+                }
+              `
+            })
+            .then(result => console.log(result));
+
+   
+    b. query data in react component: 
+
+        import React from "react";
+        import {gql} from 'apollo-boost';
+        import { useQuery } from "@apollo/react-hooks";
+        const getBooksQuery = gql`
+          {
+            books{
+              name
+              id
+            }
+          }
+        `;
+        const BookList = () =>  {
+            const { loading, error, data } = useQuery(getBooksQuery);
+            console.log(data);
+            return (
+              <div>
+                <ul id="book-list">
+                  <li>Book name</li>
+                </ul>
+              </div>
+            );
+        }
+        export default BookList;
+
+[ATTENTION]
+16. We can query data, in class based components in react without using 
+    react hooks, we have to install react-apollo package: (check episode
+    26)
+
+17. When we make request to express server, from other server, we get an 
+    error, we have to install another package to resolve this:
+
+      npm install cors 
+
+      then require it and use it :
+      const cors = require('cors');
+      ...
+      // allow cross-origin requests
+      app.use(cors());
