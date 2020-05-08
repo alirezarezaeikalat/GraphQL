@@ -295,3 +295,21 @@ after installing apolo we need to set it up:
       ...
       // allow cross-origin requests
       app.use(cors());
+
+18. to make a query to the server by apollo, we use, useQuery hook:
+
+      const { error, loading, data } = useQuery(getAuthorsQuery);
+
+      and getAuthorsQuery defined in another file and imported here:
+
+        const getAuthorsQuery = gql`
+          {
+            authors{
+              name
+              id
+            }
+          }
+        `
+
+19. unlike queries, for mutation we need input to the mutation, first we have 
+    to make a mutation with blank args, and then give this args:
