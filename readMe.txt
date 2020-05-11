@@ -296,8 +296,8 @@ after installing apolo we need to set it up:
       // allow cross-origin requests
       app.use(cors());
 
-18. to make a query to the server by apollo, we use, useQuery hook:
-
+18. to make a query to the server and get the data by apollo, we use, useQuery hook:
+      import React, {useQuery} from 'react';
       const { error, loading, data } = useQuery(getAuthorsQuery);
 
       and getAuthorsQuery defined in another file and imported here:
@@ -311,5 +311,97 @@ after installing apolo we need to set it up:
           }
         `
 
-19. unlike queries, for mutation we need input to the mutation, first we have 
-    to make a mutation with blank args, and then give this args:
+19. For mutation we can use, useMutation hook
+
+a. 
+  const ADD_BOOK = gql`
+  // AddBook name is optional
+  mutation AddBook($name: String!, $genre: String!, $authorId: String!) {
+    addBook(name: $name, genre: $genre, authorId: $authorId) {
+      name
+      id
+    }
+  }
+`;
+! means that it is required
+
+b.
+ then we can call useMutation in the component:
+
+  const [addBook, { data }] = useMutation(ADD_BOOK);
+
+    addBook is a function that perform mutation, and data consist of the current 
+    status of mutation. 
+
+c. 
+  Then we can call the addBook:
+
+    addBook({variables: {name, genre, authorId}});
+
+
+20. In this way, we successfully add data to the database, but we don't update the 
+    UI, so we have to update the Apollo catch to update the UI, there are three ways
+    that we can use to update the apollo catch: 
+
+      1. when we use addBook function that we get from useMutation, add 
+          refetchQueries, there is a problem with this, because we add new 
+          request to the server
+
+          addBook({
+            variables: { name, genre, author },
+            refetchQueries: [{ query: GET_BOOK, variables: {} }]
+          });
+
+
+      2. In this way, apollo automatically update the catch, but this way is 
+         only working in the updating an entity, and it is not working in the
+         creating and deleting
+         (Check apollo website for the instruction, you have to return id in
+         the mutation)
+
+      3. updating in mutation in case of creating and deleting: 
+
+          var [addBook] = useMutation(
+            ADD_BOOK,
+            {
+              update(cache, { data: { addBook } }) {
+                console.log(addBook);
+                const { books } = cache.readQuery({ query: GET_BOOKS});
+                console.log(books);
+                cache.writeQuery({
+                  query: GET_BOOKS,
+                  data: {books: books.concat([addBook])}
+                });
+              }
+            }
+          );
+    
+    useMutation takes another object as parameter, in this object we have 
+    update function, update function takes cache parameter and we can update 
+    the cache with readQuery and writeQuery, readQuery reads the current cache
+    and write query, write to the cache. data object and inside it(addBook)
+    are the data that mutation returns to us
+
+  
+  21. to make a query with variables :
+
+    const GET_BOOK = gql`
+      query GetBook($id: ID!) {
+        book(id: $id) {
+          id
+          name
+          genre
+          author {
+            id
+            name
+            age
+            books {
+              name
+              id
+              genre
+            }
+          }
+        }
+      }
+    `;
+

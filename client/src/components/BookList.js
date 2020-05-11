@@ -1,35 +1,38 @@
-import React from "react";
+import React, {useState} from "react";
 import { useQuery } from "@apollo/react-hooks";
-import {getBooksQuery} from '../queries/queries';
+import {GET_BOOKS} from '../queries/queries';
 
-
+// components
+import BookDetails from './BookDetails';
 
 
 const BookList = () =>  {
-    const {error, loading, data} = useQuery(getBooksQuery);
-    if(error) {
-      return(
-        <p>There is an error :(</p>
+  const [selected, setSelected] = useState('')
+  const {error, loading, data} = useQuery(GET_BOOKS);
+  if(error) {
+    return(
+      <p>There is an error :(</p>
+    );
+  }
+  if(loading) {
+    return(
+      <div>Loading Books...</div>
+    );
+  } else {
+    const booksList = data.books.map(book => {
+      return (
+        <li onClick={(e) => setSelected(book.id)} key={book.id}>{book.name}</li>
       );
-    }
-    if(loading) {
-      return(
-        <div>Loading Books...</div>
-      );
-    } else {
-      const booksList = data.books.map(book => {
-        return (
-          <li key={book.id}>{book.name}</li>
-        );
-      });
-      return(
-        <div>
-          <ul>
-            {booksList}
-          </ul>
-        </div>
-      );
-    }
+    });
+    return(
+      <div>
+        <ul>
+          {booksList}
+        </ul>
+        <BookDetails selected={selected}></BookDetails>
+      </div>
+    );
+  }
   
 }
 

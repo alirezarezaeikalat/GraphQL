@@ -107,6 +107,7 @@ const MutationType = new GraphQLObjectType({
     },
     // addBook
     addBook: {
+      // This is the return type and input type
       type: BookType,
       args: {
         name: { type: new GraphQLNonNull(GraphQLString) },

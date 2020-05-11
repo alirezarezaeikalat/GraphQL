@@ -1,6 +1,6 @@
 import React, {useState} from "react";
-import { useQuery } from "@apollo/react-hooks";
-import {getAuthorsQuery, addBookMutation} from '../queries/queries';
+import { useQuery, useMutation } from "@apollo/react-hooks";
+import {GET_AUTHORS, ADD_BOOK, GET_BOOKS} from '../queries/queries';
 
 const AddBook = () => {
   // book state
@@ -8,9 +8,9 @@ const AddBook = () => {
   const [genre, setGenre] = useState('');
   const [authorId, setAuthorId] = useState('');
   // using apolo for querying data
-  const { error, loading, data } = useQuery(getAuthorsQuery);
+  const { error, loading, data } = useQuery(GET_AUTHORS);
   if(loading) {
-    console.log('still loading')
+    
   } else {
     var options = data.authors.map(author => {
       return(
@@ -18,12 +18,28 @@ const AddBook = () => {
       );
     });
   }
+  var [addBook] = useMutation(
+    ADD_BOOK,
+    {
+      update(cache, { data: { addBook } }) {
+        console.log(addBook);
+        const { books } = cache.readQuery({ query: GET_BOOKS});
+        console.log(books);
+        cache.writeQuery({
+           query: GET_BOOKS,
+           data: {books: books.concat([addBook])}
+         });
+      }
+    }
+  );
+  //console.log(data);
   // handling submit
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log(name);
-    console.log(genre);
-    console.log(authorId);
+    addBook({
+      variables: {name, genre, authorId},
+      //refetchQueries: [{query: GET_BOOKS}]
+    });
   }
   // displaying
   return(
